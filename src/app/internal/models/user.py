@@ -5,7 +5,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 class User(models.Model):
     external_id = models.PositiveIntegerField(unique=True)
     first_name = models.CharField(max_length=255)
-    username = models.CharField(max_length=255)
+    username = models.CharField(max_length=255, unique=True)
     phone = PhoneNumberField(blank=True)
 
     def __str__(self):
