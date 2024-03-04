@@ -7,5 +7,5 @@ __pycache__
 /.env*
 .idea
 /src/.env
-*sqlite3
+*.sqlite3
 db*

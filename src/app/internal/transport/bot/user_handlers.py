@@ -10,26 +10,7 @@ from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
 from phonenumber_field.validators import validate_international_phonenumber
 from app.internal.models.user import User
 from app.internal.services.user_service import UserSerializer
-
-
-def check_phone(func):
-    @wraps(func)
-    async def wrapped(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        try:
-            user = await User.objects.aget(external_id=update.message.from_user.id)
-        except User.DoesNotExist:
-            await context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="Мы не смогли найти ваши данные, пожалуйста, запустите команду /start")
-            return
-
-        if user.phone == '':
-            await context.bot.send_message(chat_id=update.effective_chat.id,
-                                           text="Команда не доступна. Пожалуйста, введите номер '/set_phone номер', чтобы разблокировать все возможности бота")
-            return
-
-        await func(update, context)
-
-    return wrapped
+from app.internal.transport.bot.utils import check_phone
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
