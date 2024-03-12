@@ -4,7 +4,8 @@ media/
 local_settings.py
 __pycache__
 *.pyc
-/.env*
+*.env
+migrations
 .idea
 /src/.env
 *.sqlite3

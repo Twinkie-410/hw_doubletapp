@@ -26,7 +26,7 @@ def number_validator(number: str):
 
 
 class BankAccount(models.Model):
-    cash = models.PositiveIntegerField(default=0)
+    cash = models.IntegerField(default=0)
     bank_name = models.CharField(max_length=255)
     bic = models.PositiveIntegerField(validators=[validate_bic])
     account_number = models.CharField(max_length=20, validators=[number_validator])

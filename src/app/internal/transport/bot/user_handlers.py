@@ -1,28 +1,27 @@
-import json
-from functools import wraps
 from django.core.exceptions import ValidationError
-from django.core.serializers import serialize
-from django.core.serializers.json import DjangoJSONEncoder
-from django.forms import model_to_dict
-from django.http import JsonResponse
+from phonenumber_field.validators import validate_international_phonenumber
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
-from phonenumber_field.validators import validate_international_phonenumber
+
 from app.internal.models.user import User
-from app.internal.services.user_service import UserSerializer
+from app.internal.services.user_service import get_user_by_id, get_or_create, set_phone_number
 from app.internal.transport.bot.utils import check_phone
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user, _ = await User.objects.aget_or_create(
-        external_id=update.message.from_user.id,
-        defaults={
-            'first_name': update.message.from_user.first_name,
-            'username': update.message.from_user.username,
-            'phone': '',
-        }
-    )
-    await context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
+    user, _ = await get_or_create(id=update.message.from_user.id,
+                                  first_name=update.message.from_user.first_name,
+                                  username=update.message.from_user.username)
+    #     await User.objects.aget_or_create(
+    #     external_id=update.message.from_user.id,
+    #     defaults={
+    #         'first_name': update.message.from_user.first_name,
+    #         'username': update.message.from_user.username,
+    #         'phone': '',
+    #     }
+    # )
+    await context.bot.send_message(chat_id=update.effective_chat.id,
+                                   text=f"Hello, {user.first_name}, i'm ready to work")
 
 
 async def set_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -39,14 +38,18 @@ async def set_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await context.bot.send_message(chat_id=update.effective_chat.id, text=str(e.message))
         return
 
-    user, _ = await User.objects.aupdate_or_create(
-        external_id=update.message.from_user.id,
-        defaults={
-            'first_name': update.message.from_user.first_name,
-            'username': update.message.from_user.username,
-            'phone': phone,
-        }
-    )
+    user, _ = await set_phone_number(id=update.message.from_user.id,
+                                     number=phone,
+                                     first_name=update.message.from_user.first_name,
+                                     username=update.message.from_user.username)
+    #     await User.objects.aupdate_or_create(
+    #     external_id=update.message.from_user.id,
+    #     defaults={
+    #         'first_name': update.message.from_user.first_name,
+    #         'username': update.message.from_user.username,
+    #         'phone': phone,
+    #     }
+    # )
 
     await context.bot.send_message(chat_id=update.effective_chat.id, text=f"Отлично, теперь ваш номер: {user.phone}")
 
@@ -64,9 +67,13 @@ async def caps(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 @check_phone
 async def me(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user = await User.objects.aget(external_id=update.message.from_user.id)
+    user = await get_user_by_id(update.message.from_user.id)
+    user_data = [f'external_id: {user.external_id}',
+                 f'first_name: {user.first_name}',
+                 f'username: {user.username}',
+                 f'phone: {user.phone.as_e164}']
     await context.bot.send_message(chat_id=update.effective_chat.id,
-                                   text=str(UserSerializer(user).data))
+                                   text='\n'.join(u_d for u_d in user_data))
 
 
 async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):

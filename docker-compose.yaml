@@ -1,31 +1,26 @@
 version: "3.8"
 
 services:
-  db:
-    image: nouchka/sqlite3:latest
-    container_name: dthw_sqlite3
-    stdin_open: true
-    tty: true
+  postgresql:
+    image: postgres:16.2
+    container_name: postgresql
     volumes:
-      - ./src/db/:/root/db/
+      - ./src/db/:/var/lib/postgresql/data
     env_file:
       - src/.env
   django:
-    #    build:
-    #      dockerfile: Dockerfile
-    #      context: .
     image: hw_doubletapp:latest
     container_name: django
     depends_on:
-      - db
+      - postgresql
     restart: always
     ports:
       - 8000:8000
     command: >
       sh -c "python ./src/manage.py collectstatic --noinput && python ./src/manage.py migrate && python ./src/manage.py runserver 0.0.0.0:8000"
     volumes:
-      - static_volume:/yt/static
-      - media_volume:/yt/media
+      - static_volume:/app/static
+      - media_volume:/app/media
     env_file:
       - src/.env
 
@@ -33,8 +28,8 @@ services:
     image: hw_doubletapp:latest
     container_name: tg_bot
 #    environment:
-#      - PYTHONPATH="${PYTHONPATH}:/yt/src"
-    working_dir: /yt/src/app/internal
+#      - PYTHONPATH="${PYTHONPATH}:/app/src"
+    working_dir: /app/src/app/internal
     restart: always
     command: >
       sh -c "python bot.py"

@@ -3,15 +3,14 @@ from functools import wraps
 from telegram import Update
 from telegram.ext import ContextTypes
 
-from app.internal.models.user import User
+from app.internal.services.user_service import get_user_by_id
 
 
 def check_phone(func):
     @wraps(func)
     async def wrapped(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        try:
-            user = await User.objects.aget(external_id=update.message.from_user.id)
-        except User.DoesNotExist:
+        user = await get_user_by_id(update.message.from_user.id)
+        if not user:
             await context.bot.send_message(chat_id=update.effective_chat.id,
                                            text="Мы не смогли найти ваши данные, пожалуйста, запустите команду /start")
             return
