@@ -37,8 +37,14 @@ check_lint:
 	flake8 --config setup.cfg
 	black --check --config pyproject.toml .
 
+#docker
+REGISTRY=gitlab.com
+GROUP=test-assignment
+PROJECT=doubletapp
 build: ## Build the container
-	docker build -t $(APP_NAME) .
+	docker build -t $(REGISTRY)/$(GROUP)/$(PROJECT)/$(APP_NAME) .
+push:
+    docker push $(REGISTRY)/$(GROUP)/$(PROJECT)/$(APP_NAME):latest
 
 build-nc: ## Build the container without caching
 	docker build --no-cache -t $(APP_NAME) .
@@ -49,11 +55,22 @@ run:
 stop: ## Stop and remove a running container
 	docker stop $(APP_NAME); docker rm $(APP_NAME)
 
-# Build the container
-build:
-	docker-compose build --no-cache $(APP_NAME)
-	docker-compose run $(APP_NAME) grunt build
-	docker build -t $(APP_NAME) .
+#docker compose
+compose-build:
+        docker compose -f docker compose.yml build $(c)
+compose-up:
+        docker compose -f docker compose.yml up -d $(c)
+compose-start:
+        docker compose -f docker compose.yml start $(c)
+compose-down:
+        docker compose -f docker compose.yml down $(c)
+compose-stop:
+        docker compose -f docker compose.yml stop $(c)
+compose-restart:
+        docker compose -f docker compose.yml stop $(c)
+        docker compose -f docker compose.yml up -d $(c)
+compose-ps:
+        docker compose -f docker compose.yml ps
 
 
 

@@ -1,0 +1,35 @@
+image: docker/compose:alpine-1.29.2
+
+stages:
+  - build
+#  - test
+  - deploy
+
+before_script:
+  - apk add make
+#  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - cp $DOT_ENV $(pwd)/.env
+
+build:
+  stage: build
+  script: make build-nc #push
+  tags:
+    - job:build
+  only:
+    - master
+  environment:
+    name: prod
+
+deploy:
+  stage: deploy
+  script:
+    - make compose-up
+  tags:
+    - job:deploy.prod/1
+  only:
+    - master
+  environment:
+    name: prod
+  when: manual
+
+
