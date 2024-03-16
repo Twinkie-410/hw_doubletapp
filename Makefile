@@ -37,17 +37,24 @@ check_lint:
 	flake8 --config setup.cfg
 	black --check --config pyproject.toml .
 
-#docker
-REGISTRY=gitlab.com
-GROUP=test-assignment
-PROJECT=doubletapp
-build: ## Build the container
-	docker build -t $(REGISTRY)/$(GROUP)/$(PROJECT)/$(APP_NAME) .
-push:
-    docker push $(REGISTRY)/$(GROUP)/$(PROJECT)/$(APP_NAME):latest
+test:
+	echo success .
 
+#docker
+#to-do pull
+REGISTRY=registry.gitlab.com/test-assignment2273206/doubletapp
+#GROUP=test-assignment
+#PROJECT=doubletapp
+APP_NAME=hw_doubletapp
+build: ## Build the container
+	docker build -t $(REGISTRY)$(APP_NAME) .
+push:
+	docker push $(REGISTRY)/$(APP_NAME):latest
+
+pull:
+	docker pull $(REGISTRY)/$(APP_NAME):latest
 build-nc: ## Build the container without caching
-	docker build --no-cache -t $(APP_NAME) .
+	docker build --no-cache -t $(REGISTRY)$(APP_NAME) .
 
 run:
 	docker run -i -t --rm -p=$(PORT):$(PORT) --name="$(APP_NAME)" $(APP_NAME)
@@ -57,20 +64,20 @@ stop: ## Stop and remove a running container
 
 #docker compose
 compose-build:
-        docker compose -f docker compose.yml build $(c)
+	docker-compose build -f docker-compose.yml $(c)
 compose-up:
-        docker compose -f docker compose.yml up -d $(c)
+	docker-compose up -f docker-compose.yml -d $(c)
 compose-start:
-        docker compose -f docker compose.yml start $(c)
+	docker-compose start -f docker-compose.yml $(c)
 compose-down:
-        docker compose -f docker compose.yml down $(c)
+	docker-compose down -f docker-compose.yml $(c)
 compose-stop:
-        docker compose -f docker compose.yml stop $(c)
+	docker-compose stop -f docker-compose.yml $(c)
 compose-restart:
-        docker compose -f docker compose.yml stop $(c)
-        docker compose -f docker compose.yml up -d $(c)
+	docker-compose stop -f docker-compose.yml $(c)
+	docker-compose up -f docker-compose.yml -d $(c)
 compose-ps:
-        docker compose -f docker compose.yml ps
+	docker-compose ps -f docker compose.yml
 
-
-
+deploy:
+	echo "There will be real deploy here sometime"

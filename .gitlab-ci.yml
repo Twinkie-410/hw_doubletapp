@@ -2,30 +2,55 @@ image: docker/compose:alpine-1.29.2
 
 stages:
   - build
-#  - test
+  - lint
+  - test
   - deploy
 
 before_script:
   - apk add make
-#  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - cp $DOT_ENV $(pwd)/.env
 
 build:
   stage: build
-  script: make build-nc #push
+  script: make build-nc push
   tags:
-    - job:build
+    - build
   only:
     - master
   environment:
     name: prod
 
+lint:
+  image: python:3.10.13-slim
+  stage: lint
+  before_script:
+    - pip install isort
+    - pip install flake8
+    - pip install black
+#  script: make lint
+  script:
+    - isort .
+    - flake8 --config setup.cfg
+    - black --config pyproject.toml .
+  tags:
+    - lint
+
+test:
+  stage: test
+  script: make pull test
+  tags:
+    - test
+  only:
+    - master
+
+
 deploy:
   stage: deploy
   script:
-    - make compose-up
+    - make deploy
   tags:
-    - job:deploy.prod/1
+    - deploy.test/1
   only:
     - master
   environment:
