@@ -1,4 +1,6 @@
-image: docker/compose:alpine-1.29.2
+image:
+  name: docker:26.0.0-dind
+  entrypoint: ["/bin/sh", "-c"]
 
 stages:
   - build
@@ -10,6 +12,7 @@ before_script:
   - apk add make
   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   - cp $DOT_ENV $(pwd)/.env
+
 
 build:
   stage: build
@@ -28,11 +31,7 @@ lint:
     - pip install isort
     - pip install flake8
     - pip install black
-#  script: make lint
-  script:
-    - isort .
-    - flake8 --config setup.cfg
-    - black --config pyproject.toml .
+  script: make lint
   tags:
     - lint
 
@@ -48,7 +47,7 @@ test:
 deploy:
   stage: deploy
   script:
-    - make deploy
+    - make compose-down deploy
   tags:
     - deploy.test/1
   only:

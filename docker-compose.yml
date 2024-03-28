@@ -5,7 +5,8 @@ services:
     image: postgres:16.2
     container_name: postgresql
     volumes:
-      - ./src/db/:/var/lib/postgresql/data
+      - /postgres/db/hw_doubletapp:/var/lib/postgresql/data
+#      - ./src/db/:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASS}
@@ -14,8 +15,8 @@ services:
       - POSTGRES_INITDB_ARGS=-A md5
 
   django:
-#    image: ${IMAGE_APP}
-    image: hw_doubletapp:latest
+    image: ${IMAGE_APP}
+#    image: hw_doubletapp:latest
     container_name: django
     depends_on:
       - postgresql
@@ -23,7 +24,12 @@ services:
     ports:
       - 8000:8000
     command: >
-      sh -c "python ./src/manage.py collectstatic --noinput && python ./src/manage.py migrate && python ./src/manage.py runserver 0.0.0.0:8000"
+      sh -c "sleep 10 && \
+      python ./src/manage.py collectstatic --noinput && \
+      python ./src/manage.py migrate && \
+      python ./src/manage.py runserver 0.0.0.0:8000"
+#       sh -c "sleep 10 && python ./src/manage.py runserver 0.0.0.0:8000"
+
     volumes:
       - static_volume:/app/static
       - media_volume:/app/media
@@ -31,8 +37,8 @@ services:
       - .env
 
   tg_bot:
-#    image: ${IMAGE_APP}
-    image: hw_doubletapp:latest
+    image: ${IMAGE_APP}
+#    image: hw_doubletapp:latest
     container_name: tg_bot
     working_dir: /app/src/app/internal
     restart: always
