@@ -5,7 +5,7 @@ local_settings.py
 __pycache__
 *.pyc
 *.env
-migrations
+#migrations
 .idea
 /src/.env
 *.sqlite3

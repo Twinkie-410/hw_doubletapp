@@ -1,0 +1,59 @@
+image:
+  name: docker:26.0.0-dind
+  entrypoint: ["/bin/sh", "-c"]
+
+stages:
+  - build
+  - lint
+  - test
+  - deploy
+
+before_script:
+  - apk add make
+  - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  - cp $DOT_ENV $(pwd)/.env
+
+
+build:
+  stage: build
+  script: make build-nc push
+  tags:
+    - build
+  only:
+    - master
+  environment:
+    name: prod
+
+lint:
+  image: python:3.10.13-slim
+  stage: lint
+  before_script:
+    - pip install isort
+    - pip install flake8
+    - pip install black
+  script: make lint
+  tags:
+    - lint
+
+test:
+  stage: test
+  script: make pull test
+  tags:
+    - test
+  only:
+    - master
+
+
+deploy:
+  stage: deploy
+  script:
+    - make compose-down deploy
+  tags:
+    - deploy.test/1
+  only:
+    - master
+  environment:
+    name: prod
+  when: manual
+
+

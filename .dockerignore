@@ -18,7 +18,7 @@
 __pycache__
 dist
 docs
-env
+*env
 logs
 src/{{ project_name }}/settings/local.py
 src/node_modules
@@ -26,3 +26,4 @@ web/media
 web/static/CACHE
 stats
 Dockerfile
+docker-compose.yaml
