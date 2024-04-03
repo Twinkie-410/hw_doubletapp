@@ -1,8 +1,9 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
 
-from app.internal.services.bank_service import get_bank_accounts_by_user, get_cards_by_user
-from app.internal.transport.bot.utils import check_phone
+from app.internal.services.bank_service import get_bank_accounts_by_user, get_cards_by_user, transfer_money as transfer, \
+    get_account_number
+from app.internal.transport.bot.utils import check_phone, check_transfer_command
 
 
 @check_phone
@@ -25,4 +26,17 @@ async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                    text=f"Остаток от лимита на ваших картах\n{separator.join(c_l for c_l in card_limit)}")
 
 
-balance = CommandHandler('balance', balance)
+@check_phone
+async def transfer_money(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    status = await check_transfer_command(update, context)
+    if status:
+        command_text = update.message.text.split()
+        sender_number = await get_account_number(update.message.from_user.username)
+        recipient_number = await get_account_number(command_text[1])
+        amount = int(command_text[2])
+        response = await transfer(sender_number, recipient_number, amount)
+        await context.bot.send_message(chat_id=update.effective_chat.id, text=response)
+
+
+balance_handler = CommandHandler('balance', balance)
+transfer_handler = CommandHandler('transfer_money', transfer_money)

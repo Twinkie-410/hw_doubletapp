@@ -4,8 +4,9 @@ from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
 
 from app.internal.models.user import User
-from app.internal.services.user_service import get_user_by_id, get_or_create, set_phone_number
-from app.internal.transport.bot.utils import check_phone
+from app.internal.services.user_service import get_user_by_id, get_or_create, set_phone_number, get_user_by_username, \
+    add_to_favorite as _add, remove_from_favorites as _remove, get_list_favorites
+from app.internal.transport.bot.utils import check_phone, update_favorite
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -76,6 +77,31 @@ async def me(update: Update, context: ContextTypes.DEFAULT_TYPE):
                                    text='\n'.join(u_d for u_d in user_data))
 
 
+@check_phone
+async def add_to_favorite(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update_favorite(update, context, _add)
+
+
+@check_phone
+async def remove_from_favorite(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update_favorite(update, context, _remove)
+
+
+@check_phone
+async def check_favorites(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    list_favorites = await get_list_favorites(update.message.from_user.username)
+    if list_favorites is not None:
+        if len(list_favorites) > 0:
+            await context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text=str(list_favorites))
+        else:
+            await context.bot.send_message(chat_id=update.effective_chat.id,
+                                           text="Список избранных пользователей пуст")
+    else:
+        await context.bot.send_message(chat_id=update.effective_chat.id,
+                                       text="При получении списка избранных что-то пошло не так")
+
+
 async def unknown(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
 
@@ -85,4 +111,7 @@ personal_info_handler = CommandHandler('me', me)
 echo_handler = MessageHandler(filters.TEXT & (~filters.COMMAND), echo)
 caps_handler = CommandHandler('caps', caps)
 set_phone_handler = CommandHandler('set_phone', set_phone)
+add_to_favorite_handler = CommandHandler('add_to_favorite', add_to_favorite)
+remove_from_favorite_handler = CommandHandler('remove_from_favorite', remove_from_favorite)
+check_favorites_handler = CommandHandler('check_favorites', check_favorites)
 unknown_handler = MessageHandler(filters.COMMAND, unknown)

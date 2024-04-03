@@ -7,6 +7,7 @@ class User(models.Model):
     first_name = models.CharField(max_length=255)
     username = models.CharField(max_length=255, unique=True)
     phone = PhoneNumberField(blank=True)
+    favorites = models.ManyToManyField("self", blank=True, null=True, symmetrical=False)
 
     def __str__(self):
         return f"{self.external_id} {self.username}"
