@@ -31,7 +31,11 @@ lint:
     - pip install isort
     - pip install flake8
     - pip install black
-  script: make lint
+#  script: make lint
+  script:
+    - isort .
+    - flake8 --config setup.cfg
+    - black --config pyproject.toml .
   tags:
     - lint
 

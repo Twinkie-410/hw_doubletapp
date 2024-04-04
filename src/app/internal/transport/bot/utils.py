@@ -37,7 +37,7 @@ async def check_transfer_command(update: Update, context: ContextTypes.DEFAULT_T
         recipient_requisites = text[1]
 
         try:
-            amount = int(text[2])
+            int(text[2])
         except ValueError:
             await context.bot.send_message(chat_id=update.effective_chat.id, text="Сумма введена некорректно")
             return False
