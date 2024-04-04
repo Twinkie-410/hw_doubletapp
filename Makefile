@@ -85,5 +85,5 @@ compose-ps:
 	docker compose ps -f docker-compose.yml
 
 deploy:
-	docker compose -f docker-compose.yml up $(c) -d
+	docker compose -f docker-compose.yml up -d $(c)
 	#echo "There will be real deploy here sometime"

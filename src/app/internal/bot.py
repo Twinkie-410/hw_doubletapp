@@ -2,11 +2,13 @@ import logging
 import os
 import django
 from dotenv import load_dotenv
+from telegram import Bot
 from telegram.ext import ApplicationBuilder
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
-from transport.bot.user_handlers import start_handler, echo_handler, caps_handler, unknown_handler, set_phone_handler, \
+from app.internal.transport.bot.user_handlers import start_handler, echo_handler, caps_handler, unknown_handler, \
+    set_phone_handler, \
     personal_info_handler, remove_from_favorite_handler, add_to_favorite_handler, check_favorites_handler
 from app.internal.transport.bot.bank_handlers import balance_handler, transfer_handler
 
@@ -16,7 +18,8 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-if __name__ == '__main__':
+
+def setup_bot():
     application = ApplicationBuilder().token(os.getenv('TG_TOKEN')).build()
 
     application.add_handler(start_handler)
@@ -31,4 +34,12 @@ if __name__ == '__main__':
     application.add_handler(check_favorites_handler)
     application.add_handler(unknown_handler)
 
-    application.run_polling()
+    # application.run_polling()
+    return application
+
+
+BOT = setup_bot()
+
+
+def get_bot():
+    return Bot(os.getenv('TG_TOKEN'))
