@@ -1,25 +1,25 @@
 version: "3.8"
 
 services:
-  postgresql:
-    image: postgres:16.2
-    container_name: postgresql
-    volumes:
-      - /postgres/db/hw_doubletapp:/var/lib/postgresql/data
-#      - ./src/db/:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASS}
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_PORT=${DB_PORT}
-      - POSTGRES_INITDB_ARGS=-A md5
+#  postgresql:
+#    image: postgres:16.2
+#    container_name: postgresql
+#    volumes:
+#      - /postgres/db/hw_doubletapp:/var/lib/postgresql/data
+##      - ./src/db/:/var/lib/postgresql/data
+#    environment:
+#      - POSTGRES_USER=${DB_USER}
+#      - POSTGRES_PASSWORD=${DB_PASS}
+#      - POSTGRES_DB=${DB_NAME}
+#      - POSTGRES_PORT=${DB_PORT}
+#      - POSTGRES_INITDB_ARGS=-A md5
 
   django:
     image: ${IMAGE_APP}
 #    image: hw_doubletapp:latest
     container_name: django
-    depends_on:
-      - postgresql
+#    depends_on:
+#      - postgresql
     restart: always
     ports:
       - 8000:8000
